@@ -1,15 +1,16 @@
 package com.protosstechnology.train.bootexamine.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 @Entity
-@Setter
-@Getter
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Document {
@@ -20,5 +21,10 @@ public class Document {
     public Document(String documentNumber, String description) {
         this.documentNumber = documentNumber;
         this.description = description;
+    }
+
+    public Document(DocumentDto documentDto) {
+        documentNumber = documentDto.getDocumentNumber();
+        description = documentDto.getDescription();
     }
 }

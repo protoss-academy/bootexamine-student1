@@ -2,6 +2,7 @@ package com.protosstechnology.train.bootexamine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.protosstechnology.train.bootexamine.model.Document;
+import com.protosstechnology.train.bootexamine.model.DocumentDto;
 import com.protosstechnology.train.bootexamine.service.DocumentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -50,15 +48,18 @@ class BootexamineApplicationTests {
 
 	@Test
 	public void addDocument_ok() throws Exception {
-		Document mockedDoc = new Document("112", "TestDoc");
-		String docJson = objectMapper.writeValueAsString(mockedDoc);
+		DocumentDto mockedDocDto = new DocumentDto("112", "TestDoc");
+		String docJson = objectMapper.writeValueAsString(mockedDocDto);
 		MvcResult result = mockMvc.perform(post(ROOT_URL).contentType(MediaType.APPLICATION_JSON).content(docJson))
 				.andExpect(status().isOk())
 				.andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
-		assertEquals(docJson, responseString);
-		verify(documentService, times(1)).create(mockedDoc);
+		Document responseDocument = objectMapper.readValue(responseString, Document.class);
+		Document expectedDocument = new Document(mockedDocDto);
+
+		assertEquals(expectedDocument, responseDocument);
+		verify(documentService, times(1)).create(expectedDocument);
 	}
 
 	@Test
@@ -92,17 +93,18 @@ class BootexamineApplicationTests {
 
 	@Test
 	public void putDocument_ok() throws Exception {
-		Document mockedDoc = new Document("112", "TestDoc");
-		String docJson = objectMapper.writeValueAsString(mockedDoc);
+		DocumentDto mockedDocDto = new DocumentDto("112", "TestDoc");
+		String docJson = objectMapper.writeValueAsString(mockedDocDto);
 		MvcResult result = mockMvc.perform(put(ROOT_URL + "/" + FIRST_GEN_ID).contentType(MediaType.APPLICATION_JSON).content(docJson))
 				.andExpect(status().isOk())
 				.andReturn();
 
 		String responseString = result.getResponse().getContentAsString();
 		Document readDoc = objectMapper.readValue(responseString, Document.class);
-		mockedDoc.setId(FIRST_GEN_ID);
-		assertEquals(mockedDoc, readDoc);
-		verify(documentService, times(1)).update(mockedDoc);
+		Document expectedDoc = new Document(mockedDocDto);
+		expectedDoc.setId(FIRST_GEN_ID);
+		assertEquals(expectedDoc, readDoc);
+		verify(documentService, times(1)).update(expectedDoc);
 	}
 
 	@Test
